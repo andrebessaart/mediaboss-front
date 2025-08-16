@@ -56,7 +56,7 @@ export default function ManualPostForm() {
     }
   }, [successMessage]);
 
-  const onSubmit = async (data: ManualPostFormData) => {
+   const onSubmit = async (data: ManualPostFormData) => {
     setFormStatus({ loading: true, error: null });
 
     const formData = new FormData();
@@ -74,6 +74,7 @@ export default function ManualPostForm() {
       await updateUser();
 
       setSuccessMessage('Post agendado com sucesso!');
+      window.scrollTo({ top: 0, behavior: 'smooth' }); // <-- ADICIONADO AQUI
       
       reset();
 
@@ -86,6 +87,7 @@ export default function ManualPostForm() {
 	  }
 
       setFormStatus({ loading: false, error: errorMessage });
+      window.scrollTo({ top: 0, behavior: 'smooth' }); // <-- E AQUI
     } finally {
       setFormStatus(prev => ({ ...prev, loading: false }));
     }

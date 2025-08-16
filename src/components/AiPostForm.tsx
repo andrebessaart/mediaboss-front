@@ -72,28 +72,7 @@ export default function AiPostForm() {
     if (!user || loadingUser) return;
     
     setFormStatus({ loading: true, error: null });
-
-    const [hours, minutes] = data.timeOfDay.split(':').map(Number);
-
-    const scheduleDatesUTC = data.selectedDates.map(date => {
-      const scheduledDate = new Date(date);
-      scheduledDate.setHours(hours, minutes, 0, 0);
-      return scheduledDate.toISOString();
-    });
-
-    const filteredScheduleDates = scheduleDatesUTC.filter(dateStr => new Date(dateStr) > new Date());
-
-    if (filteredScheduleDates.length === 0) {
-      setFormStatus({ loading: false, error: "As datas selecionadas já passaram."});
-      return;
-    }
-
-    const payload = {
-      topic: data.topic,
-      mediaType: data.mediaType,
-      scheduleDates: filteredScheduleDates,
-      numberOfPosts: filteredScheduleDates.length,
-    };
+    // ... (lógica de datas)
 
     try {
       const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/ai/create-campaign`;
@@ -109,6 +88,7 @@ export default function AiPostForm() {
           </Link>.
         </>
       );
+      window.scrollTo({ top: 0, behavior: 'smooth' }); // <-- ADICIONADO AQUI
       reset({
         topic: '',
         mediaType: 'IMAGE',
@@ -124,6 +104,7 @@ export default function AiPostForm() {
         errorMessage = error.message;
       }
       setFormStatus({ loading: false, error: errorMessage });
+      window.scrollTo({ top: 0, behavior: 'smooth' }); // <-- E AQUI
     } finally {
         setFormStatus({ loading: false, error: null });
     }
