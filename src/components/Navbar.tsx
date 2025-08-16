@@ -28,11 +28,39 @@ type navBarObj = {
 
 export default function Navbar({ user, loading }: navBarObj) {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
-  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false); // Estado para o menu mobile
+  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { setUser } = useUser();
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+  
+  // --- INÍCIO DA LÓGICA DE ATUALIZAÇÃO DE CRÉDITOS ---
+  const [highlightCredits, setHighlightCredits] = useState(false);
+  const prevCreditsRef = useRef<number | null | undefined>(user?.credits);
+
+  // Efeito para destacar a mudança de créditos
+  useEffect(() => {
+    const prevCredits = prevCreditsRef.current;
+    const currentCredits = user?.credits;
+
+    // Verifica se os créditos foram inicializados e se mudaram
+    if (prevCredits !== undefined && prevCredits !== null && currentCredits !== undefined && currentCredits !== null && prevCredits !== currentCredits) {
+      setHighlightCredits(true);
+      const timer = setTimeout(() => {
+        setHighlightCredits(false);
+      }, 1500); // Duração do destaque: 1.5 segundos
+
+      // Limpa o timer se o componente for desmontado
+      return () => clearTimeout(timer);
+    }
+  }, [user?.credits]);
+
+  // Atualiza a referência com o valor anterior após cada renderização
+  useEffect(() => {
+    prevCreditsRef.current = user?.credits;
+  });
+  // --- FIM DA LÓGICA DE ATUALIZAÇÃO DE CRÉDITOS ---
+
 
   const handleLogout = async () => {
     try {
@@ -136,10 +164,17 @@ export default function Navbar({ user, loading }: navBarObj) {
               <div className="bg-gray-200 h-6 w-24 rounded-md animate-pulse"></div>
             )}
             {!loading && user && (
-              <div className="bg-indigo-100 text-indigo-700 font-bold text-sm px-4 py-2 rounded-full flex items-center">
-                <Icons.creditCard className="w-5 h-5 mr-2" />
-                <span>Créditos: {user.credits ?? 0}</span>
-              </div>
+               <motion.div
+                className="font-bold text-sm px-4 py-2 rounded-full flex items-center"
+                animate={{
+                  backgroundColor: highlightCredits ? '#C7D2FE' : '#E0E7FF', // De indigo-200 para indigo-100
+                  scale: highlightCredits ? 1.1 : 1,
+                }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+              >
+                <Icons.creditCard className="w-5 h-5 mr-2 text-indigo-700" />
+                <span className="text-indigo-700">Créditos: {user.credits ?? 0}</span>
+              </motion.div>
             )}
           </div>
           
@@ -178,10 +213,17 @@ export default function Navbar({ user, loading }: navBarObj) {
                 {/* Créditos no menu mobile */}
                 {!loading && user && (
                     <div className="px-3 py-2">
-                        <div className="bg-indigo-100 text-indigo-700 font-bold text-sm px-4 py-2 rounded-full flex items-center justify-center">
-                            <Icons.creditCard className="w-5 h-5 mr-2" />
-                            <span>Créditos: {user.credits ?? 0}</span>
-                        </div>
+                        <motion.div
+                            className="font-bold text-sm px-4 py-2 rounded-full flex items-center justify-center"
+                            animate={{
+                                backgroundColor: highlightCredits ? '#C7D2FE' : '#E0E7FF',
+                                scale: highlightCredits ? 1.1 : 1,
+                            }}
+                            transition={{ duration: 0.4, ease: "easeOut" }}
+                        >
+                            <Icons.creditCard className="w-5 h-5 mr-2 text-indigo-700" />
+                            <span className="text-indigo-700">Créditos: {user.credits ?? 0}</span>
+                        </motion.div>
                     </div>
                 )}
               </nav>
