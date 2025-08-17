@@ -12,6 +12,8 @@ import Modal from '@/components/Modal';
 import Button from '@/components/Button';
 import { useRouter } from 'next/navigation';
 import { Schedulepost } from '@/types/schedulepost'; 
+import PostDetailModal from '@/components/PostDetailModal';
+
 
 // Definindo os tipos para o linter não reclamar do `any`
 type PostStatus = 'posted' | 'scheduled' | 'pending_generation' | 'failed' | 'archived';
@@ -46,6 +48,7 @@ export default function DashboardClient() {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<Schedulepost | null>(null);
   
   const { user, loading: loadingUser, updateUser } = useUser();
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
@@ -148,6 +151,13 @@ export default function DashboardClient() {
       setIsModalOpen(true);
      }
   };
+  
+  const handlePostUpdate = () => {
+    // Recarrega os posts da página atual
+    if (user && user.id) {
+      fetchPosts(currentPage, debouncedSearchTerm, debouncedStartDate, debouncedEndDate, debouncedStatusFilter, user.id);
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -241,7 +251,12 @@ export default function DashboardClient() {
         </div>
         {/* AQUI: Adicionamos um container com rolagem horizontal para a tabela */}
         <div className="overflow-x-auto w-full">
-            {loadingPosts ? <p className="text-center py-8">Carregando posts...</p> : <PostTable posts={posts} />}
+            {loadingPosts ? (
+              <p className="text-center py-8">Carregando posts...</p>
+            ) : (
+              // Passa a função para selecionar um post para a tabela
+              <PostTable posts={posts} onPostSelect={(post) => setSelectedPost(post)} />
+            )}
         </div>
         {pagination && <Pagination pagination={pagination} onPageChange={setCurrentPage} />}
       </div>
@@ -256,6 +271,13 @@ export default function DashboardClient() {
           </Link>
         </div>
       </Modal>
+	  {/* Renderiza o novo modal de detalhes do post */}
+      <PostDetailModal
+        post={selectedPost}
+        isOpen={!!selectedPost}
+        onClose={() => setSelectedPost(null)}
+        onUpdate={handlePostUpdate}
+      />
     </div>
   );
 }
