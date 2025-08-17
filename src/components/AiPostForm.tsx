@@ -72,7 +72,30 @@ export default function AiPostForm() {
     if (!user || loadingUser) return;
     
     setFormStatus({ loading: true, error: null });
-    // ... (lógica de datas)
+
+    const [hours, minutes] = data.timeOfDay.split(':').map(Number);
+
+    const scheduleDatesUTC = data.selectedDates.map(date => {
+      const scheduledDate = new Date(date);
+      scheduledDate.setHours(hours, minutes, 0, 0);
+      return scheduledDate.toISOString();
+    });
+
+    const filteredScheduleDates = scheduleDatesUTC.filter(dateStr => new Date(dateStr) > new Date());
+
+    if (filteredScheduleDates.length === 0) {
+      setFormStatus({ loading: false, error: "As datas selecionadas já passaram."});
+      return;
+    }
+    
+    // --- CORREÇÃO APLICADA AQUI ---
+    // A variável 'payload' foi declarada antes de ser usada.
+    const payload = {
+      topic: data.topic,
+      mediaType: data.mediaType,
+      scheduleDates: filteredScheduleDates,
+      numberOfPosts: filteredScheduleDates.length,
+    };
 
     try {
       const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/ai/create-campaign`;
@@ -88,7 +111,7 @@ export default function AiPostForm() {
           </Link>.
         </>
       );
-      window.scrollTo({ top: 0, behavior: 'smooth' }); // <-- ADICIONADO AQUI
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       reset({
         topic: '',
         mediaType: 'IMAGE',
@@ -104,7 +127,7 @@ export default function AiPostForm() {
         errorMessage = error.message;
       }
       setFormStatus({ loading: false, error: errorMessage });
-      window.scrollTo({ top: 0, behavior: 'smooth' }); // <-- E AQUI
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
         setFormStatus({ loading: false, error: null });
     }
@@ -166,7 +189,6 @@ export default function AiPostForm() {
           </div>
         </div>
 
-        {/* AQUI: A informação foi movida para esta linha */}
         <div className="text-center font-semibold text-gray-700">
           Datas Selecionadas: {creditsNeeded} | Créditos a serem gastos: {creditsNeeded}
         </div>
@@ -215,7 +237,7 @@ export default function AiPostForm() {
           >
             Fechar
           </button>
-          <Link href="/planos">
+          <Link href="/dashboard/planos">
             <Button className="w-full sm:w-auto">
               Comprar mais créditos
             </Button>

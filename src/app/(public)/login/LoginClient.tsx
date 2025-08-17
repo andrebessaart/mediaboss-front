@@ -1,6 +1,6 @@
 // app/(public)/login/LoginClient.tsx
 
-"use client"; // Mantemos este componente como cliente
+"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -21,6 +21,7 @@ const loginFormSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginFormSchema>;
 
+// ... (manter a função normalizeEmail)
 const normalizeEmail = (email: string) => {
   if (!email || typeof email !== 'string') return email;
   const parts = email.split('@');
@@ -37,7 +38,7 @@ const normalizeEmail = (email: string) => {
   return `${localPart}@${domain.toLowerCase()}`;
 };
 
-// A ÚNICA ALTERAÇÃO É AQUI, NO NOME DA FUNÇÃO
+
 export default function LoginClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -45,6 +46,12 @@ export default function LoginClient() {
   const [shouldRedirect, setShouldRedirect] = useState(false);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const { user, loading: userContextLoading, setUser } = useUser();
+
+  // --- ADICIONADO: Estado para controlar a exibição do link de reenvio ---
+  const [showResendLink, setShowResendLink] = useState(false);
+  const [resendStatus, setResendStatus] = useState<string | null>(null);
+  const [resendLoading, setResendLoading] = useState(false);
+
 
   useEffect(() => {
     const status: string | null = searchParams.get('status');
@@ -77,6 +84,7 @@ export default function LoginClient() {
   const {
     register,
     handleSubmit,
+    getValues, // <-- ADICIONADO para pegar o e-mail para o reenvio
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginFormSchema),
@@ -84,6 +92,8 @@ export default function LoginClient() {
 
   const onSubmit = async (data: LoginFormData) => {
     setFormStatus({ loading: true, error: null, success: null });
+    setShowResendLink(false); // Reseta o link de reenvio a cada tentativa
+    setResendStatus(null);
     try {
       const dataToSend = { ...data, email: normalizeEmail(data.email) };
       const response = await axios.post(`${apiUrl}/api/auth/login`, dataToSend, {
@@ -98,6 +108,10 @@ export default function LoginClient() {
       let errorMessage = "Ocorreu um erro ao fazer login.";
       if (axios.isAxiosError(error) && error.response) {
         errorMessage = error.response.data?.error || "Ocorreu um erro ao fazer login.";
+        // --- MODIFICADO: Verifica o erro específico de e-mail não verificado ---
+        if (errorMessage === 'Por favor, confirme seu e-mail para continuar.') {
+            setShowResendLink(true);
+        }
       } else if (error instanceof Error) {
         errorMessage = error.message;
       }
@@ -105,16 +119,46 @@ export default function LoginClient() {
     }
   };
 
+  // --- ADICIONADO: Função para lidar com o reenvio do e-mail ---
+  const handleResendVerification = async () => {
+    const email = getValues("email");
+    if (!email) {
+        setResendStatus("Por favor, preencha o campo de e-mail primeiro.");
+        return;
+    }
+    setResendLoading(true);
+    setResendStatus(null);
+    try {
+        await axios.post(`${apiUrl}/api/auth/resend-verification`, { email: normalizeEmail(email) });
+        setResendStatus("Um novo link de confirmação foi enviado para o seu e-mail.");
+    } catch (error) {
+        setResendStatus("Ocorreu um erro ao reenviar o e-mail. Tente novamente.");
+    } finally {
+        setResendLoading(false);
+    }
+  };
+
+
   if (!userContextLoading && user && !shouldRedirect) {
     return null;
   }
 
-  // TODO O SEU JSX É MANTIDO INTOCADO
   return (
     <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
       <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Entrar no MediaBoss</h2>
       {formStatus.error && <Alert type="danger">{formStatus.error}</Alert>}
       {formStatus.success && <Alert type="success">{formStatus.success}</Alert>}
+      
+      {/* --- ADICIONADO: Mensagem de reenvio e link --- */}
+      {showResendLink && (
+        <div className="text-center text-sm text-gray-600 mb-4">
+            <button onClick={handleResendVerification} disabled={resendLoading} className="font-medium text-indigo-600 hover:text-indigo-500 disabled:text-gray-400 disabled:cursor-not-allowed cursor-pointer">
+                {resendLoading ? 'Enviando...' : 'Reenviar e-mail de confirmação'}
+            </button>
+            {resendStatus && <p className="mt-2 text-green-700">{resendStatus}</p>}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
