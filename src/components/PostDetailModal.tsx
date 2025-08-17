@@ -30,12 +30,11 @@ export default function PostDetailModal({ post, isOpen, onClose, onUpdate }: Pos
   const [error, setError] = useState<string | null>(null);
   const [isDeleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
-  // Atualiza a legenda no estado do modal quando o post selecionado muda
   useEffect(() => {
     if (post) {
       setEditedCaption(post.caption);
-      setIsEditing(false); // Reseta o modo de edição ao abrir
-      setError(null); // Limpa erros anteriores
+      setIsEditing(false);
+      setError(null);
     }
   }, [post]);
 
@@ -52,8 +51,8 @@ export default function PostDetailModal({ post, isOpen, onClose, onUpdate }: Pos
         { caption: editedCaption },
         { withCredentials: true }
       );
-      onUpdate(); // Recarrega a lista de posts
-      onClose(); // Fecha o modal principal
+      onUpdate();
+      onClose();
     } catch (err) {
       setError("Falha ao salvar as alterações. Tente novamente.");
       console.error(err);
@@ -70,13 +69,13 @@ export default function PostDetailModal({ post, isOpen, onClose, onUpdate }: Pos
         `${process.env.NEXT_PUBLIC_API_URL}/api/instagram/scheduled-posts/${post.id}`,
         { withCredentials: true }
       );
-      onUpdate(); // Recarrega a lista de posts
-      setDeleteConfirmOpen(false); // Fecha o modal de confirmação
-      onClose(); // Fecha o modal principal
+      onUpdate();
+      setDeleteConfirmOpen(false);
+      onClose();
     } catch (err) {
       setError("Falha ao excluir o post. Tente novamente.");
       console.error(err);
-      setDeleteConfirmOpen(false); // Fecha o modal de confirmação mesmo em caso de erro
+      setDeleteConfirmOpen(false);
     } finally {
       setIsLoading(false);
     }
@@ -85,7 +84,9 @@ export default function PostDetailModal({ post, isOpen, onClose, onUpdate }: Pos
   return (
     <>
       <Modal isOpen={isOpen} onClose={onClose} title="Detalhes da Postagem">
-        <div className="space-y-4">
+        {/* --- CORREÇÃO DE LAYOUT APLICADA AQUI --- */}
+        {/* O conteúdo principal agora tem uma altura máxima e rolagem interna */}
+        <div className="space-y-4 max-h-[75vh] overflow-y-auto pr-2">
           {error && <Alert type="danger">{error}</Alert>}
           <img
             src={post.mediaThumbnailUrl || 'https://placehold.co/400x400/e0e7ff/3730a3?text=Gerando...'}
@@ -98,40 +99,41 @@ export default function PostDetailModal({ post, isOpen, onClose, onUpdate }: Pos
               <Textarea
                 value={editedCaption}
                 onChange={(e) => setEditedCaption(e.target.value)}
-                className="mt-1 w-full min-h-[120px]"
+                className="mt-1 w-full min-h-[150px]" // Aumentado um pouco para melhor edição
                 disabled={isLoading}
               />
             ) : (
-              <p className="mt-1 p-2 text-gray-800 bg-gray-50 rounded-md whitespace-pre-wrap">{post.caption}</p>
+              <p className="mt-1 p-3 text-gray-800 bg-gray-50 rounded-md whitespace-pre-wrap border border-gray-200">{post.caption}</p>
             )}
           </div>
-          {isEditable && (
-            <div className="flex flex-col sm:flex-row justify-end items-center gap-3 pt-4 border-t">
-              {isEditing ? (
-                <>
-                  <Button variant="ghost" onClick={() => setIsEditing(false)} disabled={isLoading}>Cancelar</Button>
-                  <Button onClick={handleSaveChanges} disabled={isLoading}>
-                    {isLoading ? 'Salvando...' : 'Salvar Alterações'}
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button variant="destructive" size="sm" onClick={() => setDeleteConfirmOpen(true)} disabled={isLoading}>
-                    <Icons.trash className="w-4 h-4 mr-2" />
-                    Excluir
-                  </Button>
-                  <Button size="sm" onClick={() => setIsEditing(true)} disabled={isLoading}>
-                    <Icons.edit className="w-4 h-4 mr-2" />
-                    Editar Legenda
-                  </Button>
-                </>
-              )}
-            </div>
-          )}
         </div>
+        
+        {/* Os botões agora ficam em um rodapé fixo, fora da área de rolagem */}
+        {isEditable && (
+          <div className="flex flex-col sm:flex-row justify-end items-center gap-3 pt-4 mt-4 border-t">
+            {isEditing ? (
+              <>
+                <Button variant="ghost" onClick={() => setIsEditing(false)} disabled={isLoading}>Cancelar</Button>
+                <Button onClick={handleSaveChanges} disabled={isLoading}>
+                  {isLoading ? 'Salvando...' : 'Salvar Alterações'}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="destructive" size="sm" onClick={() => setDeleteConfirmOpen(true)} disabled={isLoading}>
+                  <Icons.trash className="w-4 h-4 mr-2" />
+                  Excluir
+                </Button>
+                <Button size="sm" onClick={() => setIsEditing(true)} disabled={isLoading}>
+                  <Icons.edit className="w-4 h-4 mr-2" />
+                  Editar Legenda
+                </Button>
+              </>
+            )}
+          </div>
+        )}
       </Modal>
 
-      {/* Modal de Confirmação para Exclusão */}
       <Modal
         isOpen={isDeleteConfirmOpen}
         onClose={() => setDeleteConfirmOpen(false)}
