@@ -14,6 +14,7 @@ type IconProps = React.SVGProps<SVGSVGElement>;
 const Icons = {
   edit: (props: IconProps) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>,
   trash: (props: IconProps) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>,
+  close: (props: IconProps) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>,
 };
 
 interface PostDetailModalProps {
@@ -84,14 +85,19 @@ export default function PostDetailModal({ post, isOpen, onClose, onUpdate }: Pos
   return (
     <>
       <Modal isOpen={isOpen} onClose={onClose} title="Detalhes da Postagem">
-        {/* --- CORREÇÃO DE LAYOUT APLICADA AQUI --- */}
-        {/* O conteúdo principal agora tem uma altura máxima e rolagem interna */}
+         <button 
+			  onClick={onClose} 
+			  className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+			  aria-label="Fechar modal"
+			>
+			  <Icons.close className="w-6 h-6" />
+        </button>
         <div className="space-y-4 max-h-[75vh] overflow-y-auto pr-2">
           {error && <Alert type="danger">{error}</Alert>}
           <img
             src={post.mediaThumbnailUrl || 'https://placehold.co/400x400/e0e7ff/3730a3?text=Gerando...'}
             alt="Preview da postagem"
-            className="w-full h-auto max-h-[400px] object-contain rounded-lg bg-gray-100"
+            className="w-full h-auto max-h-[200px] object-contain rounded-lg bg-gray-100"
           />
           <div>
             <label className="text-sm font-semibold text-gray-700">Legenda</label>

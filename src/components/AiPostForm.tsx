@@ -67,7 +67,7 @@ export default function AiPostForm() {
   const numberOfSlides = watch('numberOfSlides');
 
   // --- LÓGICA DE CÁLCULO DE CRÉDITOS ATUALIZADA ---
-  const creditsNeeded = mediaType === 'CAROUSEL' ? 1 : selectedDates?.length || 0;
+  const creditsNeeded = mediaType === 'CAROUSEL' ? numberOfSlides : selectedDates?.length || 0;
 
   useEffect(() => {
     if (!loadingUser && user && (user.credits ?? 0) < creditsNeeded) {
@@ -225,7 +225,7 @@ export default function AiPostForm() {
         </div>
 
         <div className="text-center font-semibold text-gray-700">
-          {mediaType === 'CAROUSEL' ? `1 post de carrossel | Créditos a serem gastos: 1` : `Datas Selecionadas: ${creditsNeeded} | Créditos a serem gastos: ${creditsNeeded}`}
+          {mediaType === 'CAROUSEL' ? `1 post de carrossel | Créditos a serem gastos: ${creditsNeeded}` : `Datas Selecionadas: ${creditsNeeded} | Créditos a serem gastos: ${creditsNeeded}`}
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
