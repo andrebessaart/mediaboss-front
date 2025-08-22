@@ -67,7 +67,7 @@ export default function AiPostForm() {
   const numberOfSlides = watch('numberOfSlides');
 
   // --- LÓGICA DE CÁLCULO DE CRÉDITOS ATUALIZADA ---
-  const creditsNeeded = mediaType === 'CAROUSEL' ? numberOfSlides : selectedDates?.length || 0;
+  const creditsNeeded = mediaType === 'CAROUSEL' ? (numberOfSlides || 0) : (selectedDates?.length || 0);
 
   useEffect(() => {
     if (!loadingUser && user && (user.credits ?? 0) < creditsNeeded) {
@@ -183,31 +183,39 @@ export default function AiPostForm() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               {mediaType === 'CAROUSEL' ? 'Data para Postar o Carrossel' : 'Datas para Postar as Imagens'}
             </label>
-            <Controller
-              name="selectedDates"
-              control={control}
-              render={({ field }) => (
-                <DayPicker
-                  // --- LÓGICA DE SELEÇÃO ÚNICA OU MÚLTIPLA ---
-                  mode={mediaType === 'CAROUSEL' ? 'single' : 'multiple'}
-                  selected={mediaType === 'CAROUSEL' ? field.value[0] : field.value}
-                  onSelect={(date) => {
-                    if (mediaType === 'CAROUSEL') {
-                      // Para seleção única, o DayPicker retorna Date | undefined
-                      setValue('selectedDates', date ? [date] : [], { shouldValidate: true });
-                    } else {
-                      // Para seleção múltipla, retorna Date[] | undefined
-                      field.onChange(date || []);
-                    }
-                  }}
-                  className="mx-auto"
-                  classNames={{
-                    day_selected: "bg-indigo-600 text-white hover:bg-indigo-700 hover:text-white",
-                    day_today: "font-bold text-indigo-600",
-                  }}
-                />
-              )}
-            />
+			  <Controller
+				  name="selectedDates"
+				  control={control}
+				  render={({ field }) => (
+					mediaType === 'CAROUSEL' ? (
+					  <DayPicker
+						mode="single"
+						selected={field.value[0]}
+						onSelect={(date) => {
+						  const singleDate = date as Date | undefined;
+						  setValue("selectedDates", singleDate ? [singleDate] : [], { shouldValidate: true });
+						}}
+						className="mx-auto"
+						classNames={{
+						  day_selected: "bg-indigo-600 text-white hover:bg-indigo-700 hover:text-white",
+						  day_today: "font-bold text-indigo-600",
+						}}
+					  />
+					) : (
+					  <DayPicker
+						mode="multiple"
+						required
+						selected={field.value}
+						onSelect={(dates) => field.onChange(dates || [])}
+						className="mx-auto"
+						classNames={{
+						  day_selected: "bg-indigo-600 text-white hover:bg-indigo-700 hover:text-white",
+						  day_today: "font-bold text-indigo-600",
+						}}
+					  />
+					)
+				  )}
+				/>
             {errors.selectedDates && <p className="text-red-500 text-sm mt-2 text-center">{errors.selectedDates.message}</p>}
           </div>
           <div>
