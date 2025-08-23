@@ -34,33 +34,26 @@ export default function Navbar({ user, loading }: navBarObj) {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   
-  // --- INÍCIO DA LÓGICA DE ATUALIZAÇÃO DE CRÉDITOS ---
+  // --- Lógica de atualização de créditos existente ---
   const [highlightCredits, setHighlightCredits] = useState(false);
   const prevCreditsRef = useRef<number | null | undefined>(user?.credits);
 
-  // Efeito para destacar a mudança de créditos
   useEffect(() => {
     const prevCredits = prevCreditsRef.current;
     const currentCredits = user?.credits;
 
-    // Verifica se os créditos foram inicializados e se mudaram
     if (prevCredits !== undefined && prevCredits !== null && currentCredits !== undefined && currentCredits !== null && prevCredits !== currentCredits) {
       setHighlightCredits(true);
       const timer = setTimeout(() => {
         setHighlightCredits(false);
-      }, 1500); // Duração do destaque: 1.5 segundos
-
-      // Limpa o timer se o componente for desmontado
+      }, 1500);
       return () => clearTimeout(timer);
     }
   }, [user?.credits]);
 
-  // Atualiza a referência com o valor anterior após cada renderização
   useEffect(() => {
     prevCreditsRef.current = user?.credits;
   });
-  // --- FIM DA LÓGICA DE ATUALIZAÇÃO DE CRÉDITOS ---
-
 
   const handleLogout = async () => {
     try {
@@ -75,7 +68,6 @@ export default function Navbar({ user, loading }: navBarObj) {
     }
   };
 
-  // Efeito para fechar menus ao clicar fora
   useEffect(() => {
     function handleClickOutside(event: globalThis.MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -146,19 +138,17 @@ export default function Navbar({ user, loading }: navBarObj) {
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Coluna da Esquerda: Logo */}
           <div className="flex items-center">
             <Link href="/dashboard" className="flex items-center">
               <Image 
-				  src="/logo_mediaboss.png" // Caminho a partir da pasta 'public'
+				  src="/logo_mediaboss.png"
 				  alt="MediaBoss Logo" 
-				  width={132} // Largura em pixels (h-8 = 32px)
-				  height={132} // Altura em pixels (w-8 = 32px)
+				  width={132}
+				  height={132}
 				/>
             </Link>
           </div>
 
-          {/* Coluna Central: Créditos (visível em telas maiores) */}
           <div className="hidden md:flex flex-1 justify-center">
             {loading && (
               <div className="bg-gray-200 h-6 w-24 rounded-md animate-pulse"></div>
@@ -167,7 +157,7 @@ export default function Navbar({ user, loading }: navBarObj) {
                <motion.div
                 className="font-bold text-sm px-4 py-2 rounded-full flex items-center"
                 animate={{
-                  backgroundColor: highlightCredits ? '#C7D2FE' : '#E0E7FF', // De indigo-200 para indigo-100
+                  backgroundColor: highlightCredits ? '#C7D2FE' : '#E0E7FF',
                   scale: highlightCredits ? 1.1 : 1,
                 }}
                 transition={{ duration: 0.4, ease: "easeOut" }}
@@ -178,17 +168,16 @@ export default function Navbar({ user, loading }: navBarObj) {
             )}
           </div>
           
-          {/* Coluna da Direita: Navegação e Avatar */}
           <div className="flex items-center">
-            {/* Navegação para Desktop */}
             <nav className="hidden md:flex items-center space-x-6 mr-6">
               <Link href="/dashboard" className="text-sm font-medium text-gray-600 hover:text-indigo-600">Dashboard</Link>
+              {/* NOVO LINK ADICIONADO ABAIXO */}
+              <Link href="/dashboard/auto-responder" className="text-sm font-medium text-gray-600 hover:text-indigo-600">Respostas Automáticas</Link>
               <Link href="/dashboard/planos" className="text-sm font-medium text-gray-600 hover:text-indigo-600">Planos</Link>
             </nav>
             
             {renderUserAvatar()}
 
-            {/* Botão do Menu Mobile */}
             <div className="md:hidden ml-4" ref={mobileMenuRef}>
               <button onClick={() => setMobileMenuOpen(!isMobileMenuOpen)} className="text-gray-600 hover:text-indigo-600">
                 {isMobileMenuOpen ? <Icons.close className="w-6 h-6" /> : <Icons.menu className="w-6 h-6" />}
@@ -197,7 +186,6 @@ export default function Navbar({ user, loading }: navBarObj) {
           </div>
         </div>
         
-        {/* Menu Mobile Dropdown */}
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
@@ -209,8 +197,9 @@ export default function Navbar({ user, loading }: navBarObj) {
             >
               <nav className="pt-2 pb-4 space-y-2 border-t border-gray-200">
                 <Link href="/dashboard" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Dashboard</Link>
+                {/* NOVO LINK ADICIONADO ABAIXO */}
+                <Link href="/dashboard/auto-responder" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Respostas Automáticas</Link>
                 <Link href="/dashboard/planos" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Planos</Link>
-                {/* Créditos no menu mobile */}
                 {!loading && user && (
                     <div className="px-3 py-2">
                         <motion.div
