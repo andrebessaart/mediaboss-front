@@ -553,7 +553,7 @@ export default function LandingPageV3() {
             <Link href="/termos" className="hover:text-white transition-colors">Termos</Link>
             <Link href="mailto:contato@mediaboss.com.br" className="hover:text-white transition-colors">Contato</Link>
           </div>
-          <p className="text-sm">&copy; {new Date().getFullYear()} AI MediaBoss | Andre Bessa - CNPJ 16.868.023/0001-52. Todos os direitos reservados.</p>
+          <p className="text-sm">&copy; {new Date().getFullYear()} IA MediaBoss | Andre Bessa - CNPJ 16.868.023/0001-52. Todos os direitos reservados.</p>
         </div>
       </footer>
     </div>

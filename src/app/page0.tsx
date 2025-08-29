@@ -537,7 +537,7 @@ export default function Page() {
             </div>
         </div>
         <div className="mt-8 border-t border-gray-700 pt-8 text-center text-gray-400 text-sm">
-            &copy; {new Date().getFullYear()} AI MediaBoss. Todos os direitos reservados.
+            &copy; {new Date().getFullYear()} IA MediaBoss. Todos os direitos reservados.
         </div>
       </footer>
     </main>
